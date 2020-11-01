@@ -1,0 +1,17 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "lib": [
+      "DOM",
+      "ES2015"
+    ],
+    "module": "commonjs",
+    "jsx": "react",
+    "sourceMap": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": "src",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+  }
+}

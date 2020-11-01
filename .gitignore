@@ -1,0 +1,6 @@
+.history
+node_modules
+out
+.webpack
+dist
+yarn-error.log
