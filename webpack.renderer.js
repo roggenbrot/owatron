@@ -8,7 +8,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const DEVELOPMENT = "development";
 const PRODUCTION = "production";
 
-const isDev = process.env.NODE_ENV == DEVELOPMENT;
+const isDev = (process.env.NODE_ENV === DEVELOPMENT);
 
 module.exports = {
 
@@ -38,7 +38,7 @@ module.exports = {
     "react": "React",
     "react-dom": "ReactDOM",
     "react-router-dom": "ReactRouterDOM",
-    "fs": "require('fs')" 
+    "fs": "require('fs')"
   },
 
   module: {
@@ -83,9 +83,9 @@ module.exports = {
 
   plugins: [
 
-    new CleanWebpackPlugin({
-      cleanOnceBeforeBuildPatterns: ["**/*", "!main-process.*.js"] // config for electron-main deletes this file
-    }),
+    ...isDev ? [] : [new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ["**/*", "!main-process.*.js", "!preload.*.js"]
+    })],
 
     new HtmlPlugin({
       filename: "index.html",

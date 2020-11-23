@@ -12,6 +12,6 @@
     "moduleResolution": "node",
     "baseUrl": "src",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   }
 }

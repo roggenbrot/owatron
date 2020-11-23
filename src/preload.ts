@@ -110,15 +110,19 @@ function parseEmail(node: Node) {
  */
 function onNotificationElementAdded(node: Node) {
     if (node instanceof HTMLElement) {
+
+        console.log(node);
         const newMail = node.querySelector("button[data-storybook='newmail']");
         if (newMail) {
+            console.log("Found newmail notification");
             parseEmail(newMail);
         } else {
             const reminder = node.querySelector("button[data-storybook='reminder']");
             if (reminder) {
+                console.log("Found reminder notification");
                 parseReminder(reminder);
             } else {
-                console.log(node.outerHTML);
+                console.log("Unknown notification", node.outerHTML);
             }
         }
     }
@@ -137,7 +141,7 @@ function registerNotificationObserver() {
                     mutation.addedNodes.forEach(onNotificationElementAdded)
                 );
             } catch (ex) {
-               // console.log(ex);
+                console.log(ex);
             }
         });
 
@@ -155,11 +159,53 @@ function registerNotificationObserver() {
     }
 }
 
+function registerLanguageObserver() {
+    console.log("Trying to register language observer");
+    const observer = new MutationObserver((mutations) => {
+        try {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === "lang") {
+                    const newValue = document.getElementsByTagName("html")[0].getAttribute("lang");
+                    console.log("Language changed from " + mutation.oldValue + " to " + newValue);
+                    ipcRenderer.send("onLanguageChanged", newValue);
+                }
+            });
+        } catch (ex) {
+            console.log(ex);
+        }
+    });
+
+
+    observer.observe(document.getElementsByTagName("html")[0], { childList: false, subtree: false, attributes: true });
+
+}
+
 /**
  * Handler for notification observer event registration
  */
-ipcRenderer.on("registerNotificationObserver", (event, data) => {
+ipcRenderer.on("registerObserver", (event, data) => {
+    registerLanguageObserver();
     setTimeout(() => {
         registerNotificationObserver();
     }, 5000);
 });
+
+/**
+ * Handler for retrieving the language from local storgae
+ */
+ipcRenderer.on("getLanguage", (event) => {
+    event.sender.send("getLanguage-Reply", document.getElementsByTagName("html")[0].getAttribute("lang"));
+});
+
+
+
+/*contextBridge.exposeInMainWorld(
+    "api", {
+        ping: () => console.log("pong")
+    }
+);*/
+
+
+
+
+

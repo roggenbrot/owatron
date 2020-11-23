@@ -1,5 +1,7 @@
 import { Notification } from "electron";
-import {config} from "../config";
+import { config } from "../config";
+import i18next from "../i10n";
+
 
 export interface IReminderNotification {
 
@@ -17,6 +19,8 @@ export function showReminderNotification(notification: IReminderNotification) {
 
     if (notification) {
 
+
+
         reminder.push(notification);
 
         if (reminderNotificationHandle) {
@@ -24,10 +28,10 @@ export function showReminderNotification(notification: IReminderNotification) {
         }
 
         const body = reminder.map((r) => {
-            return r.text + " (" + r.time + ")";
+            return (r.text + " (" + r.time + ")").padEnd(50);;
         }).join("\n");
-
-        const title = reminder.length + " reminder";
+        
+        const title = i18next.t("new reminder", { count: reminder.length });
 
         reminderNotificationHandle = new Notification({
             title,
@@ -36,14 +40,17 @@ export function showReminderNotification(notification: IReminderNotification) {
             icon: "resources/icons/32x32.png",
             urgency: "normal",
         });
+
+
+        reminderNotificationHandle.show();
     }
 
 }
 
 export interface IEmailNotification {
 
-    time: string;
-    text: string;
+    address: string;
+    subject: string;
 
 }
 
@@ -53,27 +60,33 @@ let emailNotificationHandle: Notification;
 
 export function showEmailNotification(notification: IEmailNotification) {
 
-    if (emailNotificationHandle) {
+    if (notification) {
 
         email.push(notification);
 
-        if (reminderNotificationHandle) {
-            reminderNotificationHandle.close();
+        if (emailNotificationHandle) {
+            emailNotificationHandle.close();
         }
 
+
         const body = email.map((r) => {
-            return r.text + " (" + r.time + ")";
+            return (r.address + ": " + r.subject).padEnd(50);
         }).join("\n");
 
-        const title = email.length + " new email(s)";
+        const title = i18next.t("new email", { count: email.length });
 
-        reminderNotificationHandle = new Notification({
+
+
+        emailNotificationHandle = new Notification({
             title,
             body,
             timeoutType: config.get("emailNotificationTimeout", "default"),
             icon: "resources/icons/32x32.png",
             urgency: "normal",
         });
+
+        console.log("Show email notification");
+        emailNotificationHandle.show();
     }
 
 }

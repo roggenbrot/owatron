@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import { config } from "./config";
 import { showContextMenu } from "./contextmenu";
+import i18next, { setLanguage } from "./i10n";
 import { showEmailNotification, showReminderNotification } from "./notification";
 
 declare const ENVIRONMENT: String;
@@ -10,7 +11,7 @@ const IS_DEV = ENVIRONMENT == "development";
 const DEV_SERVER_URL = "http://localhost:9000";
 const HTML_FILE_PATH = "index.html";
 
-let win: BrowserWindow | null = null;
+export let win: BrowserWindow | null = null;
 
 
 /**
@@ -25,9 +26,11 @@ function createWindow() {
         width: 1024,
         height: 768,
         autoHideMenuBar: true,
+        icon: __dirname + "/icons/32x32.png",
         webPreferences: {
             spellcheck: true,
-            nodeIntegration: true,
+            contextIsolation: true,
+            // nodeIntegration: true,
             preload: path.join(__dirname, "preload.js")
         }
     });
@@ -37,13 +40,14 @@ function createWindow() {
     /**
      * Set user agent so that all features are available inside OWA
      */
-    // win.webContents.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3831.6 Safari/537.36");
+    win.webContents.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3831.6 Safari/537.36");
 
     /**
      * Register handler for dom ready event
      */
     win.webContents.on("dom-ready", (event) => {
-        win?.webContents.send("registerNotificationObserver");
+        win?.webContents.send("registerObserver");
+        setLanguage();
     });
 
     /**
@@ -94,7 +98,7 @@ app.on("ready", () => {
  */
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
-        app.quit()
+        app.quit();
     }
 })
 
@@ -103,6 +107,6 @@ app.on("window-all-closed", () => {
  */
 app.on("activate", () => {
     if (win === null) {
-        createWindow()
+        createWindow();
     }
 })
