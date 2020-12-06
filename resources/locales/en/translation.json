@@ -1,4 +1,7 @@
 {
+  "Open": "Open",
+  "Settings": "Settings",
+  "Quit": "Quit",
   "new reminder": "New reminder",
   "new reminder_plural": "{{count}} new reminder",
   "new email": "New email",

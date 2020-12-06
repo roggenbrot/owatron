@@ -65,6 +65,7 @@ export function showEmailNotification(notification: IEmailNotification) {
         email.push(notification);
 
         if (emailNotificationHandle) {
+            console.log("Close email notification");
             emailNotificationHandle.close();
         }
 

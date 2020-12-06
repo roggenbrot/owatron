@@ -1,13 +1,32 @@
 import { ipcMain } from "electron";
 import fs from "fs";
 import i18next, { BackendModule } from "i18next";
-import { win } from "../main-process";
+import { updateTray, mainWindow } from "../main-process";
 
 
 declare const ENVIRONMENT: string;
-
+const IS_DEV = ENVIRONMENT == "development";
 
 const supportedLanguages = ["de", "en"];
+
+/**
+ * Get a translation file by language
+ * 
+ * @param language 
+ * @param namespace
+ */
+function getTranslationFile(language: string, namespace: string = "translation") {
+
+    let path = "resources/locales";
+    if (!IS_DEV) {
+        path = __dirname + "/" + path;
+    }
+    if (fs.existsSync(path + "/" + language + "/" + namespace + ".json")) {
+        return fs.readFileSync(path + "/" + language + "/" + namespace + ".json", "utf-8");
+    }
+    return fs.readFileSync(path + "/en/" + namespace + ".json", "utf-8");
+
+}
 
 const backend: BackendModule = {
     type: 'backend',
@@ -15,13 +34,7 @@ const backend: BackendModule = {
 
     },
     read: (language, namespace, callback) => {
-        let data;
-        if (supportedLanguages.includes(language)) {
-            data = fs.readFileSync(ENVIRONMENT === "development" ? "resources/locales/" + language + "/" + namespace + ".json" : __dirname + "/locales/" + language + "/" + namespace + ".json", "utf8");
-        } else {
-            data = fs.readFileSync(ENVIRONMENT === "development" ? "resources/locales/en/" + namespace + ".json" : __dirname + "/locales/en/" + namespace + ".json", "utf8");
-        }
-        callback(null, JSON.parse(data));
+        callback(null, JSON.parse(getTranslationFile(language, namespace)));
     },
 
     // only used in backends acting as cache layer
@@ -47,7 +60,7 @@ const getLanguage = (): Promise<string> => {
             clearTimeout(timeout);
             resolve(args);
         })
-        win?.webContents.send("getLanguage");
+        mainWindow?.webContents.send("getLanguage");
     });
 }
 
@@ -68,6 +81,7 @@ export const setLanguage = () => {
  */
 ipcMain.on("onLanguageChanged", (event, language) => {
     i18next.changeLanguage(language);
+    updateTray();
 });
 
 

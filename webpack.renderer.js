@@ -1,7 +1,9 @@
 
 const path = require("path");
 const HtmlPlugin = require("html-webpack-plugin");
+const HtmlWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const webpack = require("webpack");
 
 
 // const to avoid typos 
@@ -14,10 +16,14 @@ module.exports = {
 
   context: path.join(__dirname, "src"),
 
-  target: "electron-renderer",
+  //target: "electron-renderer",
+  target: "web",
 
   resolve: {
-    extensions: [".js", ".jsx", ".ts", ".tsx", ".json", ".css", ".scss"]
+    extensions: [".js", ".jsx", ".ts", ".tsx", ".json", ".css", ".scss"],
+    alias: {
+      "react-dom": "@hot-loader/react-dom",
+    },
   },
 
   mode: isDev ? DEVELOPMENT : PRODUCTION,
@@ -25,21 +31,25 @@ module.exports = {
   devtool: isDev ? "source-map" : undefined,
 
   entry: {
-    "polyfill": "@babel/polyfill",
-    "render-process": "./render-process.tsx"
+    "settings-render-process": [
+      "react-hot-loader/patch", // activate HMR for React
+      "webpack-dev-server/client?http://localhost:9001",// bundle the client for webpack-dev-server and connect to the provided endpoint
+      "webpack/hot/only-dev-server", // bundle the client for hot reloading, only- means to only hot reload for successful updates
+      "./settings-render-process.tsx"
+    ]
   },
 
   output: {
-    filename: isDev ? "[name].js" : "[name].[contenthash].js",
+    filename: "[name].js",
     path: path.join(__dirname, "dist")
   },
 
-  externals: {
+  /*externals: {
     "react": "React",
     "react-dom": "ReactDOM",
     "react-router-dom": "ReactRouterDOM",
     "fs": "require('fs')"
-  },
+  },*/
 
   module: {
     rules: [
@@ -64,40 +74,44 @@ module.exports = {
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
-          options: {
-            presets: [
-              "@babel/preset-typescript",
-              "@babel/preset-react",
-              "@babel/preset-env"
-            ],
-            plugins: [
-              "@babel/plugin-proposal-class-properties",
-              "@babel/plugin-transform-runtime"
-            ]
-          }
         }
       },
 
     ]
   },
-
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        vendors: {
+          test: /node_modules/,
+          name: "vendor",
+          chunks: "all",
+        },
+      },
+    },
+  },
   plugins: [
 
     ...isDev ? [] : [new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: ["**/*", "!main-process.*.js", "!preload.*.js"]
     })],
-
+    new webpack.HotModuleReplacementPlugin(),
     new HtmlPlugin({
-      filename: "index.html",
-      template: "index.html",
+      filename: "settings.html",
+      template: "settings.html",
+      scriptLoading: "blocking",
       cache: true,
+      // alwaysWriteToDisk: true,
+      inject: 'body',
+      publicPath: isDev ? "http://localhost:9000" : auto
     }),
+    new HtmlWebpackHarddiskPlugin(),
 
   ],
 
   devServer: isDev ? {
     contentBase: path.join(__dirname, "dist"),
-    compress: true,
+    // compress: true,
     hot: true,
     port: 9000
   } : undefined

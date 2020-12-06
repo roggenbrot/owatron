@@ -1,7 +1,7 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, Tray } from "electron";
+import contextMenu from "electron-context-menu";
 import path from "path";
 import { config } from "./config";
-import { showContextMenu } from "./contextmenu";
 import i18next, { setLanguage } from "./i10n";
 import { showEmailNotification, showReminderNotification } from "./notification";
 
@@ -9,66 +9,162 @@ declare const ENVIRONMENT: String;
 
 const IS_DEV = ENVIRONMENT == "development";
 const DEV_SERVER_URL = "http://localhost:9000";
-const HTML_FILE_PATH = "index.html";
+const HTML_FILE_PATH = "settings.html";
 
-export let win: BrowserWindow | null = null;
+
+
+export let mainWindow: BrowserWindow | undefined;
+let settingsWindow: BrowserWindow | undefined;
+let tray: Tray | undefined;
+const disposeContextMenu = contextMenu();
+
+
+/**
+ * Get a icon by name
+ * 
+ * @param icon 
+ */
+function getIcon(icon: string) {
+
+    if (IS_DEV) {
+        return __dirname + "/../resources/icons/" + icon;
+    } else {
+        return __dirname + "/icons/" + icon;
+    }
+
+}
 
 
 /**
  * Create a new window with OWA url loaded 
  */
-function createWindow() {
+function createMainWindow() {
 
+    if (!mainWindow) {
+        mainWindow = new BrowserWindow({
+            width: 1024,
+            height: 768,
+            autoHideMenuBar: true,
+            icon: getIcon("32x32.png"),
+            webPreferences: {
+                spellcheck: true,
+                contextIsolation: true,
+                // nodeIntegration: true,
+                preload: path.join(__dirname, "preload.js")
+            }
+        });
 
-    // console.log(__dirname);
+        // mainWindow.webContents.openDevTools();
 
-    win = new BrowserWindow({
-        width: 1024,
-        height: 768,
-        autoHideMenuBar: true,
-        icon: __dirname + "/icons/32x32.png",
-        webPreferences: {
-            spellcheck: true,
-            contextIsolation: true,
-            // nodeIntegration: true,
-            preload: path.join(__dirname, "preload.js")
-        }
-    });
+        /**
+         * Set user agent so that all features are available inside OWA
+         */
+        mainWindow.webContents.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3831.6 Safari/537.36");
 
-    win.webContents.openDevTools();
+        /**
+         * Register handler for dom ready event
+         */
+        mainWindow.webContents.on("dom-ready", (event) => {
+            mainWindow?.webContents.send("registerObserver");
+            setLanguage();
+        });
 
-    /**
-     * Set user agent so that all features are available inside OWA
-     */
-    win.webContents.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3831.6 Safari/537.36");
+        /**
+         * Register handler for window close event
+         */
+        mainWindow.on("close", (event) => {
+            if (mainWindow?.isVisible()) {
+                event.preventDefault();
+                mainWindow.hide()
+            }
+        });
 
-    /**
-     * Register handler for dom ready event
-     */
-    win.webContents.on("dom-ready", (event) => {
-        win?.webContents.send("registerObserver");
-        setLanguage();
-    });
+        /**
+         * Register handler for window closed event
+         */
+        mainWindow.on("closed", () => {
+            mainWindow = undefined;
+        });
 
-    /**
-     * Register handler for window closed event
-     */
-    win.on("closed", () => {
-        win = null;
-    });
+        /**
+         * Initialize tray
+         */
+        tray = new Tray(getIcon("32x32.png"));
+        updateTray();
 
-    /**
-     * Register handler for context menu event
-     */
-    win.webContents.on("context-menu", (event, params) => {
-        event.preventDefault();
-        showContextMenu(win?.webContents, params);
-    });
+    }
+
 
     /**
      * Load OWA URL
      */
-    win.loadURL(config.get("app.url", "https://outlook.office.com/mail"));
+    mainWindow.loadURL(config.get("app.url", "https://outlook.office.com/mail"));
+
+}
+
+
+function createSettingsWindow() {
+
+    if (!settingsWindow) {
+
+        settingsWindow = new BrowserWindow({
+            width: 400,
+            height: 600,
+            autoHideMenuBar: true,
+            icon: getIcon("32x32.png"),
+            parent: mainWindow,
+            modal: true,
+            webPreferences: {
+                spellcheck: true,
+                contextIsolation: true,
+                // nodeIntegration: true,
+            }
+        });
+
+        /**
+         * Register handler for window closed event
+         */
+        settingsWindow.on("closed", () => {
+            settingsWindow = undefined;
+        });
+
+
+    }
+
+    settingsWindow.loadURL(IS_DEV ? "http://localhost:9000/settings.html" : `file://${path.join(__dirname, 'settings.html')}`);
+
+}
+
+/**
+ * Create tray icon
+ */
+export function updateTray() {
+
+    if (tray) {
+
+        const context = Menu.buildFromTemplate([
+            {
+                label: i18next.t("Open"), click: () => {
+                    mainWindow?.show();
+                    mainWindow?.focus();
+                }
+            },
+            { label: "Separator", type: "separator" },
+            {
+                label: i18next.t("Settings"), click: () => {
+                    createSettingsWindow();
+
+                }
+            },
+            {
+                label: i18next.t("Quit"), click: () => {
+                    app.exit(0);
+                }
+            }
+        ]);
+
+        tray.setContextMenu(context);
+    }
 
 }
 
@@ -90,23 +186,17 @@ ipcMain.on("showEmailNotification", (event, data) => {
  * Register ready handler for the app
  */
 app.on("ready", () => {
-    createWindow();
+    createMainWindow();
 });
 
-/**
- * Register closed handler for the app
- */
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-})
 
 /**
- * Register activate handler for the app
+ * Register handler responsible to release all resources before exit
  */
-app.on("activate", () => {
-    if (win === null) {
-        createWindow();
-    }
-})
+app.on("before-quit", (evt) => {
+    tray?.destroy();
+    tray = undefined;
+    disposeContextMenu();
+});
+
+app.on("window-all-closed", () => app.exit(0));

@@ -1,9 +1,7 @@
 const path = require("path");
+const { spawn } = require('child_process');
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const DefinePlugin = require("webpack").DefinePlugin;
-const MainElectronReloadPlugin = require("webpack-electron-reload")({
-    path: path.join(__dirname, "./dist/main-process.js"),
-});
 
 
 
@@ -13,6 +11,48 @@ const PRODUCTION = "production";
 
 const isDev = (process.env.NODE_ENV === DEVELOPMENT);
 
+
+/**
+ * Restart electron process on code cahnge (dev mode)
+ */
+let electronProcess = undefined;
+const electronReload = function () {
+
+    const startElectron = () => {
+        const electron = require('electron');
+        console.log("path: " + process.cwd() + " " + electron);
+        const args = ['-r process', "./dist/main-process.js"];
+        electronProcess = spawn(electron, args, { stdio: 'inherit' });
+        console.log(`[${new Date().toISOString()}] [webpack-electron-reload] [server] started electron process: ${electronProcess.pid}`);
+    };
+
+    const restartElectron = () => {
+        console.log(`[${new Date().toISOString()}] [webpack-electron-reload] [server] killing electron process: ${electronProcess.pid}`);
+        try {
+            process.kill(electronProcess.pid, 9);
+        } catch (error) {
+            console.error(error);
+        }
+        startElectron();
+    };
+
+    return {
+        apply: function apply(compiler) {
+            compiler.hooks.done.tap("ElectronReload", () => {
+                if (!electronProcess) {
+                    startElectron();
+                } else {
+                    restartElectron();
+                }
+            });
+        },
+    };
+};
+
+
+/**
+ * Common webpack configuration
+ */
 const common = {
 
     context: path.join(__dirname, "src"),
@@ -31,15 +71,6 @@ const common = {
                 exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
-                    options: {
-                        presets: [
-                            "@babel/preset-typescript",
-                            "@babel/preset-env",
-                        ],
-                        plugins: [
-                            "@babel/plugin-transform-runtime"
-                        ]
-                    }
                 }
             }
         ]
@@ -63,7 +94,7 @@ const main = {
         new DefinePlugin({
             "ENVIRONMENT": JSON.stringify(isDev ? DEVELOPMENT : PRODUCTION) // this variable name must match the one declared in the main process file.
         }),
-        ...isDev ? [MainElectronReloadPlugin()]:[]
+        ...isDev ? [electronReload()] : []
 
     ]
 };
@@ -76,16 +107,16 @@ const preload = {
     },
     plugins: [
 
-        ...isDev ? []: [new CleanWebpackPlugin({
+        ...isDev ? [] : [new CleanWebpackPlugin({
             cleanOnceBeforeBuildPatterns: ["preload.js"]
         })],
 
         new DefinePlugin({
-            "ENVIRONMENT": JSON.stringify(isDev ? DEVELOPMENT : PRODUCTION) 
+            "ENVIRONMENT": JSON.stringify(isDev ? DEVELOPMENT : PRODUCTION)
         }),
 
     ]
 }
 
 
-module.exports = [{ ...common, ...preload },{ ...common, ...main }];
+module.exports = [{ ...common, ...preload }, { ...common, ...main }];
