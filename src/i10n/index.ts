@@ -1,13 +1,10 @@
-import { ipcMain } from "electron";
+// import { ipcMain } from "electron";
 import fs from "fs";
 import i18next, { BackendModule } from "i18next";
-import { updateTray, mainWindow } from "../main-process";
-
 
 declare const ENVIRONMENT: string;
 const IS_DEV = ENVIRONMENT == "development";
 
-const supportedLanguages = ["de", "en"];
 
 /**
  * Get a translation file by language
@@ -46,44 +43,6 @@ const backend: BackendModule = {
         /* save the missing translation */
     }
 }
-
-/**
- * Get the current language settings of the outlook app
- */
-const getLanguage = (): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            ipcMain.removeHandler("getLanguage-Reply");
-            reject("No answer of getLanguage")
-        }, 500);
-        ipcMain.once("getLanguage-Reply", (event, args) => {
-            clearTimeout(timeout);
-            resolve(args);
-        })
-        mainWindow?.webContents.send("getLanguage");
-    });
-}
-
-/**
- * Set the current language based on outlook app setting
- */
-export const setLanguage = () => {
-    getLanguage()
-        .then((language) => {
-            i18next.changeLanguage(language);
-        }).catch((error) => {
-            console.log("Error while trying to set language");
-        });
-};
-
-/**
- * Handler for change language event
- */
-ipcMain.on("onLanguageChanged", (event, language) => {
-    i18next.changeLanguage(language);
-    updateTray();
-});
-
 
 if (!i18next.isInitialized) {
     i18next

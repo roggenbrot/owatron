@@ -16,7 +16,7 @@ module.exports = {
 
   context: path.join(__dirname, "src"),
 
-  //target: "electron-renderer",
+  // target: "electron-renderer",
   target: "web",
 
   resolve: {
@@ -43,13 +43,6 @@ module.exports = {
     filename: "[name].js",
     path: path.join(__dirname, "dist")
   },
-
-  /*externals: {
-    "react": "React",
-    "react-dom": "ReactDOM",
-    "react-router-dom": "ReactRouterDOM",
-    "fs": "require('fs')"
-  },*/
 
   module: {
     rules: [

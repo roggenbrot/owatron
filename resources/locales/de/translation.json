@@ -1,6 +1,12 @@
 {
+  "General": "Allgemein",
+  "URL": "URL",
+  "Notifications": "Benachrichtigungen",
+  "Email Notification Timeout": "Timeout für Emails",
+  "Reminder Notification Timeout": "Timeout für Erinnerungen",
   "Open": "Öffnen",
   "Settings": "Einstellungen",
+  "Reload": "Neu Laden",
   "Quit": "Beenden",
   "new reminder": "Neue Erinnerung",
   "new reminder_plural": "{{count}} neue Erinnerungen",

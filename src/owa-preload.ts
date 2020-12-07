@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
 
-console.log("Loading preload script");
+console.log("Loading owa preload script");
 
 /**
  * Parse a reminder callout element
@@ -38,7 +38,7 @@ function parseReminder(node: Node) {
         const time = reminderWrapper?.childNodes[0]?.childNodes[0]?.textContent;
         if (text && time) {
 
-            ipcRenderer.send('showReminderNotification', {
+            ipcRenderer.invoke("showReminderNotification", {
                 text,
                 time
             });
@@ -93,7 +93,7 @@ function parseEmail(node: Node) {
         const address = emailWrapper?.childNodes[0]?.textContent;
         const subject = emailWrapper?.childNodes[1]?.textContent;
         if (address && subject) {
-            ipcRenderer.send('showEmailNotification', {
+            ipcRenderer.invoke("showEmailNotification", {
                 address,
                 subject
             });
@@ -167,7 +167,7 @@ function registerLanguageObserver() {
                 if (mutation.attributeName === "lang") {
                     const newValue = document.getElementsByTagName("html")[0].getAttribute("lang");
                     console.log("Language changed from " + mutation.oldValue + " to " + newValue);
-                    ipcRenderer.send("onLanguageChanged", newValue);
+                    ipcRenderer.invoke("onLanguageChanged", newValue);
                 }
             });
         } catch (ex) {
@@ -183,18 +183,12 @@ function registerLanguageObserver() {
 /**
  * Handler for notification observer event registration
  */
-ipcRenderer.on("registerObserver", (event, data) => {
+ipcRenderer.on("onDomReady", async (event, data) => {
     registerLanguageObserver();
+    await ipcRenderer.invoke("onLanguageChanged", document.getElementsByTagName("html")[0].getAttribute("lang"));
     setTimeout(() => {
         registerNotificationObserver();
     }, 5000);
-});
-
-/**
- * Handler for retrieving the language from local storgae
- */
-ipcRenderer.on("getLanguage", (event) => {
-    event.sender.send("getLanguage-Reply", document.getElementsByTagName("html")[0].getAttribute("lang"));
 });
 
 

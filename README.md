@@ -35,6 +35,14 @@ Based on [Freelook](https://github.com/eNkru/freelook) developed by [eNkru](http
     Ideas and contributions welcome
 
 
+## Q&A
+
+* Isn't usage of React for the settings dialog like using a sledgehammer to crack a nut ?
+
+    Definitely. But I wanted to use the same framework that is used in OWA to adapt sooner or later L&F of OWA.
+
+
+
 ## Installation
 
 

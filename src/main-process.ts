@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, Menu, Tray } from "electron";
 import contextMenu from "electron-context-menu";
 import path from "path";
 import { config } from "./config";
-import i18next, { setLanguage } from "./i10n";
+import i18next from "./i10n";
 import { showEmailNotification, showReminderNotification } from "./notification";
 
 declare const ENVIRONMENT: String;
@@ -50,7 +50,7 @@ function createMainWindow() {
                 spellcheck: true,
                 contextIsolation: true,
                 // nodeIntegration: true,
-                preload: path.join(__dirname, "preload.js")
+                preload: path.join(__dirname, "owa-preload.js")
             }
         });
 
@@ -65,8 +65,7 @@ function createMainWindow() {
          * Register handler for dom ready event
          */
         mainWindow.webContents.on("dom-ready", (event) => {
-            mainWindow?.webContents.send("registerObserver");
-            setLanguage();
+            mainWindow?.webContents.send("onDomReady");
         });
 
         /**
@@ -92,13 +91,14 @@ function createMainWindow() {
         tray = new Tray(getIcon("32x32.png"));
         updateTray();
 
+
     }
 
 
     /**
      * Load OWA URL
      */
-    mainWindow.loadURL(config.get("app.url", "https://outlook.office.com/mail"));
+    mainWindow.loadURL(config.get("url", "https://outlook.office.com/mail"));
 
 }
 
@@ -117,9 +117,13 @@ function createSettingsWindow() {
             webPreferences: {
                 spellcheck: true,
                 contextIsolation: true,
-                // nodeIntegration: true,
+                enableRemoteModule: true,
+                //nodeIntegration: true,
+                preload: path.join(__dirname, "settings-preload.js")
             }
         });
+
+        // settingsWindow.webContents.openDevTools();
 
         /**
          * Register handler for window closed event
@@ -128,10 +132,9 @@ function createSettingsWindow() {
             settingsWindow = undefined;
         });
 
-
     }
-
-    settingsWindow.loadURL(IS_DEV ? "http://localhost:9000/settings.html" : `file://${path.join(__dirname, 'settings.html')}`);
+    const file = "settings.html?language=" + i18next.language;
+    settingsWindow.loadURL(IS_DEV ? "http://localhost:9000/" + file : `file://${path.join(__dirname, file)}`);
 
 }
 
@@ -157,6 +160,11 @@ export function updateTray() {
                 }
             },
             {
+                label: i18next.t("Reload"), click: () => {
+                    createMainWindow();
+                }
+            },
+            {
                 label: i18next.t("Quit"), click: () => {
                     app.exit(0);
                 }
@@ -169,17 +177,50 @@ export function updateTray() {
 }
 
 /**
- * Register handler for show reminder notification event
+ * Handler for show reminder notification event
  */
-ipcMain.on("showReminderNotification", (event, data) => {
+ipcMain.handle("showReminderNotification", (event, data) => {
     showReminderNotification(data);
 });
 
 /**
- * Register handler for show email notification event
+ * Handler for show email notification event
  */
-ipcMain.on("showEmailNotification", (event, data) => {
+ipcMain.handle("showEmailNotification", (event, data) => {
     showEmailNotification(data);
+});
+
+/**
+ * Handler for change language event
+ */
+ipcMain.handle("onLanguageChanged", (event, language) => {
+    i18next.changeLanguage(language);
+    updateTray();
+});
+
+/**
+ * Handler for get store data
+ */
+ipcMain.handle("getStoreValue", (event, key, defaultValue) => {
+    return config.get(key, defaultValue);
+});
+
+/**
+ * Handler for get all store data
+ */
+ipcMain.handle("getStore", (event) => {
+    return config.store;
+});
+
+/**
+ * Handler for set store data
+ */
+ipcMain.handle("setStoreValue", (event, key, value) => {
+    config.set(key, value);
+    if (key === "url") {
+        // Url has changed, reload the window
+        createMainWindow();
+    }
 });
 
 /**

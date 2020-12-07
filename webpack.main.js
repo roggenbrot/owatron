@@ -100,15 +100,33 @@ const main = {
 };
 
 
-const preload = {
+const owaPreload = {
     target: "electron-preload",
     entry: {
-        "preload": "./preload.ts"
+        "owa-preload": "./owa-preload.ts"
     },
     plugins: [
 
         ...isDev ? [] : [new CleanWebpackPlugin({
-            cleanOnceBeforeBuildPatterns: ["preload.js"]
+            cleanOnceBeforeBuildPatterns: ["owa-preload.js"]
+        })],
+
+        new DefinePlugin({
+            "ENVIRONMENT": JSON.stringify(isDev ? DEVELOPMENT : PRODUCTION)
+        }),
+
+    ]
+}
+
+const settingsPreload = {
+    target: "electron-preload",
+    entry: {
+        "settings-preload": "./settings-preload.ts"
+    },
+    plugins: [
+
+        ...isDev ? [] : [new CleanWebpackPlugin({
+            cleanOnceBeforeBuildPatterns: ["settings-preload.js"]
         })],
 
         new DefinePlugin({
@@ -119,4 +137,4 @@ const preload = {
 }
 
 
-module.exports = [{ ...common, ...preload }, { ...common, ...main }];
+module.exports = [{ ...common, ...owaPreload },{ ...common, ...settingsPreload }, { ...common, ...main }];
