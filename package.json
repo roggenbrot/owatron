@@ -56,10 +56,7 @@
         "from": "./dist",
         "to": "",
         "filter": "*"
-      },
-      "!**/node_modules/*",
-      "!**/dist/*",
-      "!**/out/*"
+      }
     ],
     "linux": {
       "icon": "./resources/icons",
