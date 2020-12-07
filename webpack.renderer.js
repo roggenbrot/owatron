@@ -96,7 +96,7 @@ module.exports = {
       cache: true,
       // alwaysWriteToDisk: true,
       inject: 'body',
-      publicPath: isDev ? "http://localhost:9000" : auto
+      publicPath: isDev ? "http://localhost:9000" : "auto"
     }),
     new HtmlWebpackHarddiskPlugin(),
 
