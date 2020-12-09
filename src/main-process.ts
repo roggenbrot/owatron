@@ -95,8 +95,10 @@ function createMainWindow() {
         /**
          * Initialize tray
          */
-        tray = new Tray(getIcon("32x32.png"));
-        updateTray();
+        if (!tray || tray.isDestroyed()) {
+            tray = new Tray(getIcon("32x32.png"));
+            updateTray();
+        }
 
 
     }
@@ -249,6 +251,7 @@ ipcMain.handle("resetCookies", async (event) => {
     });
     mainWindow?.close();
     mainWindow = undefined;
+
     createMainWindow();
 
 });
