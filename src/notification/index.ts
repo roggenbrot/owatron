@@ -41,16 +41,8 @@ let reminderNotificationHandle: Notification | undefined;
  */
 export function reset() {
     reminder = []
-    email = [];
-    if (reminderNotificationHandle) {
-        reminderNotificationHandle.close();
-        reminderNotificationHandle = undefined;
-    }
-    if (emailNotificationHandle) {
-        emailNotificationHandle.close();
-        emailNotificationHandle = undefined;
-    }
-
+    reminderNotificationHandle?.close();
+    emailNotificationHandle?.close();
 }
 
 /**
@@ -67,38 +59,38 @@ export function showReminderNotification(notification: IReminderNotification) {
             reminder.push(notification);
         }
 
-        if (reminderNotificationHandle) {
-            reminderNotificationHandle.close();
-        }
-
         const body = reminder.map((r) => {
             return (r.text + " (" + r.time + ")").padEnd(50);;
         }).join("\n");
 
         const title = i18next.t("new reminder", { count: reminder.length });
 
-        reminderNotificationHandle = new Notification({
-            title,
-            body,
-            timeoutType: config.get("reminderNotificationTimeout", "default"),
-            icon: getIcon("32x32.png"),
-            urgency: "normal",
-        });
+        if (!reminderNotificationHandle) {
+            reminderNotificationHandle = new Notification({
+                title,
+                body,
+                timeoutType: config.get("reminderNotificationTimeout", "default"),
+                icon: getIcon("32x32.png"),
+                urgency: "normal",
+            });
+        } else {
+            reminderNotificationHandle.title = title;
+            reminderNotificationHandle.body = body;
+            reminderNotificationHandle.timeoutType = config.get("reminderNotificationTimeout", "default");
+        }
 
-        reminderNotificationHandle.once("click", () => {
+
+
+        reminderNotificationHandle.on("click", () => {
             reminder = [];
             mainWindow?.show();
             mainWindow?.focus();
             reminderNotificationHandle?.close();
-            reminderNotificationHandle = undefined;
         });
 
-        reminderNotificationHandle.once("close", () => {
+        reminderNotificationHandle.on("close", () => {
             reminder = [];
-            reminderNotificationHandle?.close();
-            reminderNotificationHandle = undefined;
         });
-
 
         reminderNotificationHandle.show();
     }
@@ -114,7 +106,7 @@ export interface IEmailNotification {
 
 let email: IEmailNotification[] = [];
 
-let emailNotificationHandle: Notification | undefined;
+let emailNotificationHandle: Notification;
 
 export function showEmailNotification(notification: IEmailNotification) {
 
@@ -126,39 +118,37 @@ export function showEmailNotification(notification: IEmailNotification) {
         }
 
 
-        if (emailNotificationHandle) {
-            console.log("Close email notification");
-            emailNotificationHandle.close();
-        }
-
-
         const body = email.map((r) => {
             return (r.address + ": " + r.subject).padEnd(50);
         }).join("\n");
 
         const title = i18next.t("new email", { count: email.length });
 
-        emailNotificationHandle = new Notification({
-            title,
-            body,
-            timeoutType: config.get("emailNotificationTimeout", "default"),
-            icon: getIcon("32x32.png"),
-            urgency: "normal",
-        });
+        if (!emailNotificationHandle) {
+            emailNotificationHandle = new Notification({
+                title,
+                body,
+                timeoutType: config.get("emailNotificationTimeout", "default"),
+                icon: getIcon("32x32.png"),
+                urgency: "normal",
+            });
+        } else {
+            emailNotificationHandle.title = title;
+            emailNotificationHandle.body = body;
+            emailNotificationHandle.timeoutType = config.get("emailNotificationTimeout", "default");
+        }
 
-        emailNotificationHandle.once("close", () => {
+        emailNotificationHandle.on("close", () => {
             email = [];
-            emailNotificationHandle?.close();
-            emailNotificationHandle = undefined;
         });
 
-        emailNotificationHandle.once("click", () => {
+        emailNotificationHandle.on("click", () => {
             email = [];
             mainWindow?.show();
             mainWindow?.focus();
             emailNotificationHandle?.close();
-            emailNotificationHandle = undefined;
         });
+
 
         console.log("Show email notification");
         emailNotificationHandle.show();
