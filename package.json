@@ -1,7 +1,7 @@
 {
   "name": "owatron",
   "productName": "owatron",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Linux Desktop App for Outlook Web App",
   "main": "main-process.js",
   "repository": {
@@ -38,9 +38,9 @@
     },
     "files": [
       {
-        "from": "./",
+        "from": "./package.json",
         "to": "",
-        "filter": "package.json"
+        "filter": ["package.json","!node_modules/**/*"]
       },
       {
         "from": "./resources/icons",
@@ -56,7 +56,9 @@
         "from": "./dist",
         "to": "",
         "filter": "*"
-      }
+      },
+      "!node_modules/**/*",
+      "!**/out/*"
     ],
     "linux": {
       "icon": "./resources/icons",

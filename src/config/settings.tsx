@@ -1,4 +1,4 @@
-import { Dropdown, IDropdownOption, Pivot, PivotItem } from "@fluentui/react";
+import { DefaultButton, Dropdown, IDropdownOption, Pivot, PivotItem } from "@fluentui/react";
 import { ThemeProvider } from "@fluentui/react-theme-provider";
 import { useBoolean } from "@uifabric/react-hooks";
 import { IConfig } from "config";
@@ -11,6 +11,7 @@ import { useAsync } from "react-use";
 declare const api: {
     getConfig: () => Promise<IConfig>,
     setConfigKey: (key: string, value: any) => void,
+    resetCookies: () => void;
     i18n: (key: string) => string
 };
 
@@ -68,13 +69,18 @@ const Settings = () => {
                 // t("General")
                 headerText={api.i18n("General")}
             >
-                <Dropdown
-                    // t("URL")
-                    label={api.i18n("URL")}
-                    options={urls}
-                    selectedKey={config.value?.url ?? "https://outlook.office.com/mail"}
-                    onChange={onUrlChange}
-                />
+                <div style={{ display: "grid", rowGap: "20px" }}>
+                    <Dropdown
+                        // t("URL")
+                        label={api.i18n("URL")}
+                        options={urls}
+                        selectedKey={config.value?.url ?? "https://outlook.office.com/mail"}
+                        onChange={onUrlChange}
+                    />
+                    <div style={{display: "flex", justifyContent: "center"}}>
+                        <DefaultButton text={api.i18n("Reset Cookies")} onClick={() => api.resetCookies()} />
+                    </div>
+                </div>
             </PivotItem>
 
             <PivotItem

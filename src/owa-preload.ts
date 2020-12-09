@@ -181,7 +181,7 @@ function registerLanguageObserver() {
 }
 
 /**
- * Handler for notification observer event registration
+ * Handler for dom ready event
  */
 ipcRenderer.on("onDomReady", async (event, data) => {
     registerLanguageObserver();
@@ -193,11 +193,6 @@ ipcRenderer.on("onDomReady", async (event, data) => {
 
 
 
-/*contextBridge.exposeInMainWorld(
-    "api", {
-        ping: () => console.log("pong")
-    }
-);*/
 
 
 

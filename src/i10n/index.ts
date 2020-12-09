@@ -18,7 +18,7 @@ function getTranslationFile(language: string, namespace: string = "translation")
     if (!IS_DEV) {
         path = __dirname + "/locales" ;
     }else{
-        path = __dirname + "/resources/locales" ;
+        path = __dirname + "/../resources/locales" ;
     }
     if (fs.existsSync(path + "/" + language + "/" + namespace + ".json")) {
         return fs.readFileSync(path + "/" + language + "/" + namespace + ".json", "utf-8");

@@ -34,6 +34,11 @@ Based on [Freelook](https://github.com/eNkru/freelook) developed by [eNkru](http
     
     Ideas and contributions welcome
 
+## Troubleshooting
+
+### Loading hangs on spinner
+
+This is most of the time caused by a invalid/invalidated authentication token. Open the settings dialog and press `Reset cookies`
 
 ## Q&A
 

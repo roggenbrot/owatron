@@ -3,7 +3,7 @@ import contextMenu from "electron-context-menu";
 import path from "path";
 import { config } from "./config";
 import i18next from "./i10n";
-import { showEmailNotification, showReminderNotification } from "./notification";
+import { reset, showEmailNotification, showReminderNotification } from "./notification";
 
 declare const ENVIRONMENT: String;
 
@@ -76,6 +76,13 @@ function createMainWindow() {
                 event.preventDefault();
                 mainWindow.hide()
             }
+        });
+
+        /**
+         * Register handler for window focus event
+         */
+        mainWindow.on("focus", () => {
+            reset();
         });
 
         /**
@@ -161,6 +168,8 @@ export function updateTray() {
             },
             {
                 label: i18next.t("Reload"), click: () => {
+                    mainWindow?.close();
+                    mainWindow = undefined;
                     createMainWindow();
                 }
             },
@@ -221,6 +230,27 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
         // Url has changed, reload the window
         createMainWindow();
     }
+});
+
+/**
+ * Handler for reset cookies event
+ */
+ipcMain.handle("resetCookies", async (event) => {
+
+    const cookies = await mainWindow?.webContents.session.cookies.get({
+
+    });
+    cookies?.forEach(async (cookie) => {
+        let url = cookie.secure ? 'https://' : 'http://';
+        url += cookie.domain?.charAt(0) === '.' ? 'www' : '';
+        url += cookie.domain;
+        url += cookie.path;
+        await mainWindow?.webContents.session.cookies.remove(url, cookie.name);
+    });
+    mainWindow?.close();
+    mainWindow = undefined;
+    createMainWindow();
+
 });
 
 /**
