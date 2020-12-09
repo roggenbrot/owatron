@@ -4,6 +4,7 @@
 
 A [Electron-based](https://www.electronjs.org/) Linux desktop app for Microsoft Outlook and Office 365
 
+![](https://user-images.githubusercontent.com/41467575/101615862-ec19d080-3a0e-11eb-860b-1e0b8eafb707.png)
 
 * Electron
 * Typescript
@@ -16,14 +17,22 @@ Based on [Freelook](https://github.com/eNkru/freelook) developed by [eNkru](http
 ## Features
 
 * Desktop notifications for mail and reminders 
+
+    ![](https://user-images.githubusercontent.com/41467575/101616215-65b1be80-3a0f-11eb-99b4-1abefccb10af.png)
+
 * i18n support for desktop notifications and settings dialog based on language setting of outlook
     * en
     * de
     
     Contributions for additional languages welcome 
 * Spellchecker support
+
+    ![](https://user-images.githubusercontent.com/41467575/101616444-a7db0000-3a0f-11eb-9b03-ba9ecac85329.png)
+
 * Context menu support
 * System Tray integration
+
+    ![grafik](https://user-images.githubusercontent.com/41467575/101616612-dd7fe900-3a0f-11eb-8f32-66abbddd680e.png)
 
 ## Roadmap
 
