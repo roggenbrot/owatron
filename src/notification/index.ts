@@ -62,9 +62,10 @@ export function showReminderNotification(notification: IReminderNotification) {
 
     if (notification) {
 
-
-
-        reminder.push(notification);
+        // Check if same notificaton already exist
+        if (!reminder.find((r => r.text === notification.text && r.time === notification.time))) {
+            reminder.push(notification);
+        }
 
         if (reminderNotificationHandle) {
             reminderNotificationHandle.close();
@@ -94,6 +95,7 @@ export function showReminderNotification(notification: IReminderNotification) {
 
         reminderNotificationHandle.once("close", () => {
             reminder = [];
+            reminderNotificationHandle?.close();
             reminderNotificationHandle = undefined;
         });
 
@@ -118,7 +120,11 @@ export function showEmailNotification(notification: IEmailNotification) {
 
     if (notification) {
 
-        email.push(notification);
+        // Check if same notificaton already exist
+        if (!email.find((r => r.address === notification.address && r.subject === notification.subject))) {
+            email.push(notification);
+        }
+
 
         if (emailNotificationHandle) {
             console.log("Close email notification");
@@ -142,6 +148,7 @@ export function showEmailNotification(notification: IEmailNotification) {
 
         emailNotificationHandle.once("close", () => {
             email = [];
+            emailNotificationHandle?.close();
             emailNotificationHandle = undefined;
         });
 
