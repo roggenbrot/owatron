@@ -183,7 +183,7 @@ function registerLanguageObserver() {
 /**
  * Handler for dom ready event
  */
-ipcRenderer.on("onDomReady", async (event, data) => {
+ipcRenderer.on("onDomReady", async () => {
     registerLanguageObserver();
     await ipcRenderer.invoke("onLanguageChanged", document.getElementsByTagName("html")[0].getAttribute("lang"));
     setTimeout(() => {

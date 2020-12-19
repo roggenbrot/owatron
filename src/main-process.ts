@@ -5,11 +5,10 @@ import { config } from "./config";
 import i18next from "./i10n";
 import { reset, showEmailNotification, showReminderNotification } from "./notification";
 
-declare const ENVIRONMENT: String;
+declare const ENVIRONMENT: string;
 
 const IS_DEV = ENVIRONMENT == "development";
-const DEV_SERVER_URL = "http://localhost:9000";
-const HTML_FILE_PATH = "settings.html";
+
 
 
 
@@ -64,7 +63,7 @@ function createMainWindow() {
         /**
          * Register handler for dom ready event
          */
-        mainWindow.webContents.on("dom-ready", (event) => {
+        mainWindow.webContents.on("dom-ready", () => {
             mainWindow?.webContents.send("onDomReady");
         });
 
@@ -150,7 +149,7 @@ function createSettingsWindow() {
 /**
  * Create tray icon
  */
-export function updateTray() {
+export function updateTray(): void {
 
     if (tray) {
 
@@ -219,7 +218,7 @@ ipcMain.handle("getStoreValue", (event, key, defaultValue) => {
 /**
  * Handler for get all store data
  */
-ipcMain.handle("getStore", (event) => {
+ipcMain.handle("getStore", () => {
     return config.store;
 });
 
@@ -237,7 +236,7 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
 /**
  * Handler for reset cookies event
  */
-ipcMain.handle("resetCookies", async (event) => {
+ipcMain.handle("resetCookies", async () => {
 
     const cookies = await mainWindow?.webContents.session.cookies.get({
 
@@ -267,7 +266,7 @@ app.on("ready", () => {
 /**
  * Register handler responsible to release all resources before exit
  */
-app.on("before-quit", (evt) => {
+app.on("before-quit", () => {
     tray?.destroy();
     tray = undefined;
     disposeContextMenu();

@@ -3,7 +3,7 @@ import { config } from "../config";
 import i18next from "../i10n";
 import { mainWindow } from "../main-process";
 
-declare const ENVIRONMENT: String;
+declare const ENVIRONMENT: string;
 
 const IS_DEV = ENVIRONMENT == "development";
 
@@ -39,7 +39,7 @@ let reminderNotificationHandle: Notification | undefined;
 /**
  * Reset current email an reminder notifications
  */
-export function reset() {
+export function reset(): void {
     reminder = []
     reminderNotificationHandle?.close();
     emailNotificationHandle?.close();
@@ -50,7 +50,7 @@ export function reset() {
  *
  * @param notification 
  */
-export function showReminderNotification(notification: IReminderNotification) {
+export function showReminderNotification(notification: IReminderNotification): void {
 
     if (notification) {
 
@@ -60,7 +60,7 @@ export function showReminderNotification(notification: IReminderNotification) {
         }
 
         const body = reminder.map((r) => {
-            return (r.text + " (" + r.time + ")").padEnd(50);;
+            return (r.text + " (" + r.time + ")").padEnd(50);
         }).join("\n");
 
         const title = i18next.t("new reminder", { count: reminder.length });
@@ -108,7 +108,7 @@ let email: IEmailNotification[] = [];
 
 let emailNotificationHandle: Notification;
 
-export function showEmailNotification(notification: IEmailNotification) {
+export function showEmailNotification(notification: IEmailNotification): void {
 
     if (notification) {
 

@@ -3,9 +3,7 @@ const { spawn } = require('child_process');
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const DefinePlugin = require("webpack").DefinePlugin;
 
-
-
-// const to avoid typos 
+// const to avoid typos
 const DEVELOPMENT = "development";
 const PRODUCTION = "production";
 
@@ -68,7 +66,21 @@ const common = {
     module: {
         rules: [
             {
-                test: /\.ts$/,
+                test: /\.(js|ts)$/,
+                enforce: 'pre',
+                use: [
+                    {
+                        options: {
+                            eslintPath: require.resolve('eslint'),
+
+                        },
+                        loader: require.resolve('eslint-loader'),
+                    },
+                ],
+                exclude: /node_modules/,
+            },
+            {
+                test: /\.(js|ts)$/,
                 exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
@@ -138,4 +150,4 @@ const settingsPreload = {
 }
 
 
-module.exports = [{ ...common, ...owaPreload },{ ...common, ...settingsPreload }, { ...common, ...main }];
+module.exports = [{ ...common, ...owaPreload }, { ...common, ...settingsPreload }, { ...common, ...main }];

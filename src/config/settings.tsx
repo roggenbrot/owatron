@@ -10,7 +10,7 @@ import { useAsync } from "react-use";
 
 declare const api: {
     getConfig: () => Promise<IConfig>,
-    setConfigKey: (key: string, value: any) => void,
+    setConfigKey: (key: string, value: string) => void,
     resetCookies: () => void;
     i18n: (key: string) => string
 };
