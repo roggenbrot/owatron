@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, Tray } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray } from "electron";
 import contextMenu from "electron-context-menu";
 import path from "path";
 import { config } from "./config";
@@ -89,6 +89,15 @@ function createMainWindow() {
          */
         mainWindow.on("closed", () => {
             mainWindow = undefined;
+        });
+
+        /**
+         * Register new window handler to open new-window request in external application
+         */
+        mainWindow.webContents.on("new-window", (event, url) => {
+            console.log("Open " + url + " in external application");
+            event.preventDefault();
+            shell.openExternal(url);
         });
 
         /**
