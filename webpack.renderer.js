@@ -28,7 +28,7 @@ module.exports = {
 
   mode: isDev ? DEVELOPMENT : PRODUCTION,
 
-  devtool: isDev ? "source-map" : undefined,
+  devtool: isDev ? "source-map" : false,
 
   entry: {
     "settings-render-process": [
@@ -71,6 +71,9 @@ module.exports = {
       },
 
     ]
+  },
+  performance: {
+    hints: false
   },
   optimization: {
     splitChunks: {

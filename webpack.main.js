@@ -56,6 +56,7 @@ const electronReload = function () {
 const common = {
 
     context: path.join(__dirname, "src"),
+    devtool: isDev ? 'inline-source-map' : false,
     mode: isDev ? DEVELOPMENT : PRODUCTION,
     output: {
         filename: "[name].js",
