@@ -180,15 +180,35 @@ function registerLanguageObserver() {
 
 }
 
+let storageReseted = false;
+
+async function onDomReady(i = 1){
+
+    if(document.getElementById("loadingScreen")){
+        // If the loading screen does not disappear, we have to reset cache
+        if(!storageReseted && i > 5){
+            await ipcRenderer.invoke("resetStorage");
+            storageReseted = true;
+        }
+        setTimeout(() => {
+            onDomReady(i++);
+        }, 1000);
+    }else{
+
+        registerLanguageObserver();
+        await ipcRenderer.invoke("onLanguageChanged", document.getElementsByTagName("html")[0].getAttribute("lang"));
+        registerNotificationObserver(); 
+    }
+
+}
+
 /**
  * Handler for dom ready event
  */
 ipcRenderer.on("onDomReady", async () => {
-    registerLanguageObserver();
-    await ipcRenderer.invoke("onLanguageChanged", document.getElementsByTagName("html")[0].getAttribute("lang"));
     setTimeout(() => {
-        registerNotificationObserver();
-    }, 5000);
+        onDomReady();
+    }, 1000);
 });
 
 

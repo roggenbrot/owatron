@@ -247,20 +247,21 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
  */
 ipcMain.handle("resetCookies", async () => {
 
-    const cookies = await mainWindow?.webContents.session.cookies.get({
-
-    });
-    cookies?.forEach(async (cookie) => {
-        let url = cookie.secure ? 'https://' : 'http://';
-        url += cookie.domain?.charAt(0) === '.' ? 'www' : '';
-        url += cookie.domain;
-        url += cookie.path;
-        await mainWindow?.webContents.session.cookies.remove(url, cookie.name);
-    });
+    await mainWindow?.webContents.session.clearStorageData({storages: ["appcache","filesystem","serviceworker","cachestorage","cookies"]});
     mainWindow?.close();
     mainWindow = undefined;
 
     createMainWindow();
+
+});
+
+
+/**
+ * Handler for reset storage event
+ */
+ipcMain.handle("resetStorage", async () => {
+
+    await mainWindow?.webContents.session.clearStorageData({storages: ["appcache","filesystem","serviceworker","cachestorage"]});
 
 });
 
