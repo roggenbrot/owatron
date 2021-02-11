@@ -95,9 +95,29 @@ function createMainWindow() {
          * Register new window handler to open new-window request in external application
          */
         mainWindow.webContents.on("new-window", (event, url) => {
-            console.log("Open " + url + " in external application");
             event.preventDefault();
-            shell.openExternal(url);
+            if (!url.startsWith(config.get("url"))) {
+                console.log("Open " + url + " in external application");
+                shell.openExternal(url);
+            }
+            const win = new BrowserWindow({
+                show: false,
+                autoHideMenuBar: true,
+                icon: getIcon("32x32.png"),
+                webPreferences: {
+                    spellcheck: true,
+                    contextIsolation: true,
+                    // nodeIntegration: true,
+                    preload: path.join(__dirname, "owa-preload.js")
+                }
+            });
+            win.once("ready-to-show", () => win.show());
+            win.webContents.on("dom-ready", () => {
+                win?.webContents.send("onDomReady");
+            });
+            win.webContents.openDevTools();
+            win.loadURL(url);
+            event.newGuest = win;
         });
 
         /**
@@ -247,7 +267,7 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
  */
 ipcMain.handle("resetCookies", async () => {
 
-    await mainWindow?.webContents.session.clearStorageData({storages: ["appcache","filesystem","serviceworker","cachestorage","cookies"]});
+    await mainWindow?.webContents.session.clearStorageData({ storages: ["appcache", "filesystem", "serviceworker", "cachestorage", "cookies"] });
     mainWindow?.close();
     mainWindow = undefined;
 
@@ -261,7 +281,7 @@ ipcMain.handle("resetCookies", async () => {
  */
 ipcMain.handle("resetStorage", async () => {
 
-    await mainWindow?.webContents.session.clearStorageData({storages: ["appcache","filesystem","serviceworker","cachestorage"]});
+    await mainWindow?.webContents.session.clearStorageData({ storages: ["appcache", "filesystem", "serviceworker", "cachestorage"] });
 
 });
 

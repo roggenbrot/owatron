@@ -180,6 +180,19 @@ function registerLanguageObserver() {
 
 }
 
+function registerHeadingObserver(){
+    setTimeout(() => {
+    const title = document.querySelector("div[role='heading'][title]");
+    if(title){
+        console.log("Found title");
+        document.title = title.getAttribute("title") as string;
+    }else{
+        console.log("No title available");
+    }
+}, 1000);
+
+}
+
 let storageReseted = false;
 
 async function onDomReady(i = 1){
@@ -194,7 +207,7 @@ async function onDomReady(i = 1){
             onDomReady(i++);
         }, 1000);
     }else{
-
+        registerHeadingObserver(); 
         registerLanguageObserver();
         await ipcRenderer.invoke("onLanguageChanged", document.getElementsByTagName("html")[0].getAttribute("lang"));
         registerNotificationObserver(); 
