@@ -253,7 +253,7 @@ async function onDomReady(i = 1) {
 
     if (document.getElementById("loadingScreen")) {
         // If the loading screen does not disappear, we have to reset cache
-        if (!storageReseted && i > 5) {
+        if (!storageReseted && i > 30) {
             await ipcRenderer.invoke("resetStorage");
             storageReseted = true;
         }

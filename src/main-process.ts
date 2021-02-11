@@ -47,6 +47,7 @@ function createMainWindow() {
             icon: getIcon("32x32.png"),
             webPreferences: {
                 spellcheck: true,
+                nativeWindowOpen: true,
                 contextIsolation: true,
                 // nodeIntegration: true,
                 preload: path.join(__dirname, "owa-preload.js")
