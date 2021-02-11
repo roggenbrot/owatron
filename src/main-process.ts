@@ -108,6 +108,7 @@ function createMainWindow() {
                 webPreferences: {
                     spellcheck: true,
                     contextIsolation: true,
+                    nativeWindowOpen: true,
                     // nodeIntegration: true,
                     preload: path.join(__dirname, "owa-preload.js")
                 }

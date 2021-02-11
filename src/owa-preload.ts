@@ -136,20 +136,20 @@ function parseEmail(node: Node) {
                 </div>
                 */
 
-                const text = onPremise.querySelectorAll("div div span");
-                if (text && text.length === 3) {
-                    const address = text.item(0)?.textContent;
-                    const subject = text.item(1)?.textContent;
+                const text = onPremise.querySelectorAll("span");
+                if (text && text.length === 5) {
+                    const address = text.item(1)?.textContent;
+                    const subject = text.item(2)?.textContent;
                     if (address && subject) {
                         ipcRenderer.invoke("showEmailNotification", {
                             address,
                             subject
                         });
                     } else {
-                        console.log("Could not read new mail callout since expected hierarchy not fulfilled", node.outerHTML);
+                        console.log("Could not read new mail callout since expected hierarchy not fulfilled - no address/subject", node.outerHTML);
                     }
                 } else {
-                    console.log("Could not read new mail callout since expected hierarchy not fulfilled", node.outerHTML);
+                    console.log("Could not read new mail callout since expected hierarchy not fulfilled - " + text.length, node.outerHTML);
                 }
 
             }
