@@ -1,12 +1,13 @@
-import { DefaultButton, Dropdown, IDropdownOption, Pivot, PivotItem } from "@fluentui/react";
+import { ComboBox, DefaultButton, Dropdown, IDropdownOption, Pivot, PivotItem } from "@fluentui/react";
 import { ThemeProvider } from "@fluentui/react-theme-provider";
 import { useBoolean } from "@uifabric/react-hooks";
 import { IConfig } from "config";
 import React, { useCallback, useMemo } from "react";
 import { hot } from "react-hot-loader/root";
 import { useAsync } from "react-use";
+import { initializeIcons } from '@uifabric/icons';
 
-
+initializeIcons();
 
 declare const api: {
     getConfig: () => Promise<IConfig>,
@@ -70,7 +71,9 @@ const Settings = () => {
                 headerText={api.i18n("General")}
             >
                 <div style={{ display: "grid", rowGap: "20px" }}>
-                    <Dropdown
+                    <ComboBox
+                         allowFreeform={true}
+                         autoComplete="on"
                         // t("URL")
                         label={api.i18n("URL")}
                         options={urls}
