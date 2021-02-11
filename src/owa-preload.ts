@@ -159,14 +159,12 @@ function parseEmail(node: Node) {
 }
 
 /**
- * Event handler for added elements on the Fuent UI callout div
+ * Event handler for added elements on the Fluent UI callout div
  * @param node 
  */
 function onNotificationElementAdded(node: Node) {
     if (node instanceof HTMLElement) {
-
-        console.log(node);
-        const newMail = node.querySelector("button[data-storybook='newmail']");
+        const newMail = node.querySelector("button[data-storybook='newmail']") ?? node.querySelector(".o365cs-notifications-newMailPopupButtonCell") ;
         if (newMail) {
             console.log("Found newmail notification");
             parseEmail(newMail);

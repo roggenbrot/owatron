@@ -96,9 +96,10 @@ function createMainWindow() {
          */
         mainWindow.webContents.on("new-window", (event, url) => {
             event.preventDefault();
-            if (!url.startsWith(config.get("url"))) {
+            if (!url.startsWith(config.get("url","https://outlook.office.com/mail"))) {
                 console.log("Open " + url + " in external application");
                 shell.openExternal(url);
+                return;
             }
             const win = new BrowserWindow({
                 show: false,
@@ -115,7 +116,8 @@ function createMainWindow() {
             win.webContents.on("dom-ready", () => {
                 win?.webContents.send("onDomReady");
             });
-            win.webContents.openDevTools();
+            // win.webContents.openDevTools();
+            console.log("Open " + url + " in new window");
             win.loadURL(url);
             event.newGuest = win;
         });
