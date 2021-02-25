@@ -9,41 +9,66 @@ console.log("Loading owa preload script");
  */
 function parseReminder(node: Node) {
 
-    /* New reminder callout
-    <button type="button" data-storybook="reminder"
-        class="ms-Button _3rsUP82WSAWrd2_ltrkYqu ms-Button--action ms-Button--command root-115" data-is-focusable="true"
-        tabindex="-1">
-        <span class="ms-Button-flexContainer _1_WrKcTbnYdDAFqzC4SSeW flexContainer-86"
-            data-automationid="splitbuttonprimary">
-            <div class="_1No_MTwEqWqrxpLMLyewVV" id="CharmControlID57"></div>
-            <div class="_2FExrHciwQ0OfU3n4wXbm4">
-                <div class="_3JvUSBrE7i4EvsSuQ4qQaX">
-                    <div class="PW6IONUfEQd0sJHkwWKio">Test</div>
-                    <div class="_2LTiFXMdIPUAYBsZ924g6x">Now</div>
-                </div>
-                <div class="_152OXH0Wv5AJy2MYNeNvBF">
-                    <div class="_3lanHQZYgbRG-wj0O20psN">11:30</div>
-                    <div class="Pqix-KFjAnL4CfIddz4Kw"></div>
-                </div>
-            </div>
-        </span>
-    </button>
-    */
+    /* New reminder callout */
     if (node instanceof HTMLElement) {
-        // Button has one child element (Wrapper)
-        // Element below button has 2 child element (div and reminder data wrapper)
-        // Element 1 has 2 childs (Reminder text and time)
-        const reminderWrapper = node.childNodes[0]?.childNodes[1];
-        const text = reminderWrapper?.childNodes[0]?.childNodes[0]?.textContent;
-        const time = reminderWrapper?.childNodes[0]?.childNodes[0]?.textContent;
-        if (text && time) {
 
-            ipcRenderer.invoke("showReminderNotification", {
-                text,
-                time
-            });
+        if (node.tagName === "BUTTON") {
+            /*
+                <button type="button" data-storybook="reminder"
+                    class="ms-Button _3rsUP82WSAWrd2_ltrkYqu ms-Button--action ms-Button--command root-115" data-is-focusable="true"
+                    tabindex="-1">
+                    <span class="ms-Button-flexContainer _1_WrKcTbnYdDAFqzC4SSeW flexContainer-86"
+                        data-automationid="splitbuttonprimary">
+                        <div class="_1No_MTwEqWqrxpLMLyewVV" id="CharmControlID57"></div>
+                        <div class="_2FExrHciwQ0OfU3n4wXbm4">
+                            <div class="_3JvUSBrE7i4EvsSuQ4qQaX">
+                                <div class="PW6IONUfEQd0sJHkwWKio">Test</div>
+                                <div class="_2LTiFXMdIPUAYBsZ924g6x">Now</div>
+                            </div>
+                            <div class="_152OXH0Wv5AJy2MYNeNvBF">
+                                <div class="_3lanHQZYgbRG-wj0O20psN">11:30</div>
+                                <div class="Pqix-KFjAnL4CfIddz4Kw"></div>
+                            </div>
+                        </div>
+                    </span>
+                </button>
+            */
+            // Button has one child element (Wrapper)
+            // Element below button has 2 child element (div and reminder data wrapper)
+            // Element 1 has 2 childs (Reminder text and time)
+            const reminderWrapper = node.childNodes[0]?.childNodes[1];
+            const text = reminderWrapper?.childNodes[0]?.childNodes[0]?.textContent;
+            const time = reminderWrapper?.childNodes[0]?.childNodes[0]?.textContent;
+            if (text && time) {
+
+                ipcRenderer.invoke("showReminderNotification", {
+                    text,
+                    time
+                });
+            } else {
+                console.log("Could not read new reminder callout since expected hierarchy not fulfilled", node.outerHTML);
+            }
         } else {
-            console.log("Could not read new reminder callout since expected hierarchy not fulfilled", node.outerHTML);
+            const notifications = node.querySelectorAll(".o365cs-notifications-reminders-row");
+            if (notifications && notifications.length > 0) {
+                console.log("O365 onPremise notifications");
+                notifications.forEach((notification)=>{
+                    const text = notification.querySelector(".o365cs-notifications-reminders-title")?.textContent;
+                    const duration = notification.querySelector(".o365cs-notifications-reminders-timeDuration")?.textContent;
+                    if(text){
+                        ipcRenderer.invoke("showReminderNotification", {
+                            text,
+                            duration
+                        });
+                    }else{
+                        console.log("No text for reminder available");
+                    }
+
+                });
+            }else {
+                console.log("Could not read new notification callout since expected hierarchy not fulfilled - " + notifications.length, node.outerHTML);
+            }
+
         }
     }
 
@@ -164,12 +189,12 @@ function parseEmail(node: Node) {
  */
 function onNotificationElementAdded(node: Node) {
     if (node instanceof HTMLElement) {
-        const newMail = node.querySelector("button[data-storybook='newmail']") ?? node.querySelector(".o365cs-notifications-newMailPopupButtonCell") ;
+        const newMail = node.querySelector("button[data-storybook='newmail']") ?? node.querySelector(".o365cs-notifications-newMailPopupButtonCell");
         if (newMail) {
             console.log("Found newmail notification");
             parseEmail(newMail);
         } else {
-            const reminder = node.querySelector("button[data-storybook='reminder']");
+            const reminder = node.querySelector("button[data-storybook='reminder']") ?? node.querySelector(".o365cs-notifications-reminders-container");
             if (reminder) {
                 console.log("Found reminder notification");
                 parseReminder(reminder);
