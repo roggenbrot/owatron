@@ -106,9 +106,10 @@ function createMainWindow() {
                 show: false,
                 autoHideMenuBar: true,
                 icon: getIcon("32x32.png"),
+                parent: mainWindow,
                 webPreferences: {
                     spellcheck: true,
-                    contextIsolation: true,
+                    // contextIsolation: true,
                     nativeWindowOpen: true,
                     // nodeIntegration: true,
                     preload: path.join(__dirname, "owa-preload.js")
