@@ -49,6 +49,7 @@ function createMainWindow() {
                 spellcheck: true,
                 nativeWindowOpen: true,
                 contextIsolation: true,
+                affinity: "owatron",
                 // nodeIntegration: true,
                 preload: path.join(__dirname, "owa-preload.js")
             }
@@ -111,6 +112,7 @@ function createMainWindow() {
                     spellcheck: true,
                     // contextIsolation: true,
                     nativeWindowOpen: true,
+                    affinity: "owatron",
                     // nodeIntegration: true,
                     preload: path.join(__dirname, "owa-preload.js")
                 }
