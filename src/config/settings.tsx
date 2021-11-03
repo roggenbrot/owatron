@@ -5,9 +5,6 @@ import { IConfig } from "config";
 import React, { useCallback, useMemo } from "react";
 import { hot } from "react-hot-loader/root";
 import { useAsync } from "react-use";
-import { initializeIcons } from '@uifabric/icons';
-
-initializeIcons();
 
 declare const api: {
     getConfig: () => Promise<IConfig>,

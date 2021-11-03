@@ -2,7 +2,7 @@
 
 # Owatron
 
-A [Electron-based](https://www.electronjs.org/) Linux desktop app for Microsoft Outlook and Office 365
+A alternative [Electron-based](https://www.electronjs.org/) Linux desktop app for Microsoft Outlook and Office 365
 
 ![](https://user-images.githubusercontent.com/41467575/101615862-ec19d080-3a0e-11eb-860b-1e0b8eafb707.png)
 
